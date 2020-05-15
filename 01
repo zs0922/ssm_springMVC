@@ -1,0 +1,615 @@
+-----------------------------------------pom.xml----------------------------------------
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>org.example</groupId>
+  <artifactId>untitled3</artifactId>
+  <version>1.0-SNAPSHOT</version>
+  <packaging>war</packaging>
+
+  <name>untitled3 Maven Webapp</name>
+  <!-- FIXME change it to the project's website -->
+  <url>http://www.example.com</url>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.compiler.source>1.8</maven.compiler.source>
+    <maven.compiler.target>1.8</maven.compiler.target>
+    <spring.version>5.2.5.RELEASE</spring.version>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-context</artifactId>
+      <version>${spring.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-web</artifactId>
+      <version>${spring.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-webmvc</artifactId>
+      <version>${spring.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>servlet-api</artifactId>
+      <version>2.5</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>javax.servlet.jsp</groupId>
+      <artifactId>jsp-api</artifactId>
+      <version>2.0</version>
+      <scope>provided</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <finalName>untitled3</finalName>
+    <pluginManagement><!-- lock down plugins versions to avoid using Maven defaults (may be moved to parent pom) -->
+      <plugins>
+        <plugin>
+          <artifactId>maven-clean-plugin</artifactId>
+          <version>3.1.0</version>
+        </plugin>
+        <!-- see http://maven.apache.org/ref/current/maven-core/default-bindings.html#Plugin_bindings_for_war_packaging -->
+        <plugin>
+          <artifactId>maven-resources-plugin</artifactId>
+          <version>3.0.2</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>3.8.0</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>2.22.1</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-war-plugin</artifactId>
+          <version>3.2.2</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-install-plugin</artifactId>
+          <version>2.5.2</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-deploy-plugin</artifactId>
+          <version>2.8.2</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+</project>
+-----------------------------------------web.xml----------------------------------------
+<!DOCTYPE web-app PUBLIC
+ "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
+ "http://java.sun.com/dtd/web-app_2_3.dtd" >
+
+<web-app>
+  <display-name>Archetype Created Web Application</display-name>
+<!--配置前端控制器-->
+  <servlet>
+    <servlet-name>dispatcherServlet</servlet-name>
+    <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+    <init-param>
+      <param-name>contextConfigLocation</param-name>
+      <param-value>classpath:springmvc.xml</param-value>
+    </init-param>
+    <load-on-startup>1</load-on-startup>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>dispatcherServlet</servlet-name>
+    <url-pattern>/</url-pattern>
+  </servlet-mapping>
+<!--配置解决中文乱码的过滤器-->
+  <filter>
+    <filter-name>characterEncodingFilter</filter-name>
+    <filter-class>org.springframework.web.filter.CharacterEncodingFilter</filter-class>
+    <init-param>
+      <param-name>encoding</param-name>
+      <param-value>UTF-8</param-value>
+    </init-param>
+  </filter>
+  <filter-mapping>
+    <filter-name>characterEncodingFilter</filter-name>
+    <url-pattern>/*</url-pattern>
+  </filter-mapping>
+</web-app>
+-----------------------------------------springmvc.xml----------------------------------------
+<?xml version="1.0" encoding="UTF-8" ?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="
+        http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/mvc
+        http://www.springframework.org/schema/mvc/spring-mvc.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context.xsd">
+    <!--    开启注解扫描-->
+    <context:component-scan base-package="org.example"></context:component-scan>
+    <!--    视图解析器对象-->
+    <bean id="internalResourceViewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name="prefix" value="/WEB-INF/pages/"></property>
+        <property name="suffix" value=".jsp"></property>
+    </bean>
+    <!--    配置自定义类型转换器-->
+    <bean id="conversionService" class="org.springframework.context.support.ConversionServiceFactoryBean">
+        <property name="converters">
+            <set>
+                <bean class="org.example.utils.StringToDateConverter"/>
+            </set>
+        </property>
+    </bean>
+    <!--    mvc:annotation-driven开启SpringMVC框架注解的支持，让处理器、映射器生效-->
+    <!--    conversion-service让自定义的类型转换器生效-->
+    <mvc:annotation-driven conversion-service="conversionService"></mvc:annotation-driven>
+
+</beans>
+-----------------------------------------Account.java----------------------------------------
+package org.example.domain;
+
+import java.io.Serializable;
+import java.util.List;
+import java.util.Map;
+
+public class Account implements Serializable {
+    private String username;
+    private String password;
+    private Float money;
+
+//    private User user;
+
+    private List<User> mylist;
+    private Map<String,User> mymap;
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public Float getMoney() {
+        return money;
+    }
+
+    public void setMoney(Float money) {
+        this.money = money;
+    }
+/*
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+*/
+
+    public List<User> getMylist() {
+        return mylist;
+    }
+
+    public void setMylist(List<User> mylist) {
+        this.mylist = mylist;
+    }
+
+    public Map<String, User> getMymap() {
+        return mymap;
+    }
+
+    public void setMymap(Map<String, User> mymap) {
+        this.mymap = mymap;
+    }
+
+    @Override
+    public String toString() {
+        return "Account{" +
+                "username='" + username + '\'' +
+                ", password='" + password + '\'' +
+                ", money=" + money +
+                ", mylist=" + mylist +
+                ", mymap=" + mymap +
+                '}';
+    }
+}
+-----------------------------------------User.java----------------------------------------
+package org.example.domain;
+
+import java.io.Serializable;
+import java.util.Date;
+
+public class User implements Serializable {
+    private String uname;
+    private Integer age;
+    private Date date;
+
+    public String getUname() {
+        return uname;
+    }
+
+    public void setUname(String uname) {
+        this.uname = uname;
+    }
+
+    public Integer getAge() {
+        return age;
+    }
+
+    public void setAge(Integer age) {
+        this.age = age;
+    }
+
+    public Date getDate() {
+        return date;
+    }
+
+    public void setDate(Date date) {
+        this.date = date;
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "uname='" + uname + '\'' +
+                ", age=" + age +
+                ", date=" + date +
+                '}';
+    }
+}
+-----------------------------------------StringToDateConverter.java----------------------------------------
+package org.example.utils;
+
+import org.springframework.core.convert.converter.Converter;
+
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+public class StringToDateConverter implements Converter<String, Date> {
+    public Date convert(String source){
+        if(source==null){
+            throw new RuntimeException("请您传入数据");
+        }
+        DateFormat df=new SimpleDateFormat("yyyy-MM-dd");
+        try{
+            return df.parse(source);
+        }catch(Exception e){
+            throw new RuntimeException("类型转换出现错误");
+        }
+    }
+}
+-----------------------------------------index.jsp----------------------------------------
+<%--
+  Created by IntelliJ IDEA.
+  User: ZS
+  Date: 2020/5/13
+  Time: 17:34
+  To change this template use File | Settings | File Templates.
+--%>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<html>
+<head>
+    <title>Title</title>
+</head>
+<body>
+    <h3>快速入门</h3>
+    <a href="hello">快速入门</a>
+</body>
+</html>
+-----------------------------------------testContrller.java----------------------------------------
+package org.example.controller;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+//控制器类
+@Controller
+public class testController {
+    @RequestMapping(path = "/hello")
+    public String linkController(){
+        System.out.println("hello SpringMVC");
+        return "success";
+    }
+}
+-----------------------------------------param.jsp----------------------------------------
+<%--
+  Created by IntelliJ IDEA.
+  User: ZS
+  Date: 2020/5/14
+  Time: 9:47
+  To change this template use File | Settings | File Templates.
+--%>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<html>
+<head>
+    <title>Title</title>
+</head>
+<body>
+<%--请求数据绑定
+    <a href="param/paramtest?username=hehe&password=123">请求参数绑定</a>
+    --%>
+<%--请求数据绑定并封装到对象中
+    <form action="param/formtest" method="post">
+        姓名：<input type="text" name="username" /><br/>
+        密码：<input type="password" name="password" /><br/>
+        金额：<input type="text" name="money" /><br/>
+        别名：<input type="text" name="user.uname" /><br/>
+        年龄：<input type="text" name="user.age" /><br/>
+        <input type="submit" value="提交" />
+    </form>
+    --%>
+<%--请求数据绑定并封装到包含list和map的对象中
+    <form action="param/formlistmaptest" method="post">
+        姓名：<input type="text" name="username" /><br/>
+        密码：<input type="password" name="password" /><br/>
+        金额：<input type="text" name="money" /><br/>
+<%--        封装到list中--%
+        别名：<input type="text" name="mylist[0].uname" /><br/>
+        年龄：<input type="text" name="mylist[0].age" /><br/>
+<%--        封装到map中--%
+        别名：<input type="text" name="mymap['one'].uname" /><br/>
+        年龄：<input type="text" name="mymap['one'].age" /><br/>
+        <input type="submit" value="提交" />
+    </form>
+--%>
+<%--请求数据绑定并封装到包含Data类型的对象中
+    <form action="param/formdatetest" method="post">
+        别名：<input type="text" name="uname" /><br/>
+        年龄：<input type="text" name="age" /><br/>
+        生日：<input type="text" name="date" /><br/>
+        <input type="submit" value="提交" />
+    </form>
+    --%>
+    <a href="param/servletapitest">请求原生ServeletAPI</a>
+</body>
+</html>
+-----------------------------------------ParamBinding.java----------------------------------------
+package org.example.controller;
+
+import org.example.domain.Account;
+import org.example.domain.User;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+@Controller
+@RequestMapping("/param")
+public class ParamBinding {
+    //请求数据绑定
+    @RequestMapping("/paramtest")
+    public String paramTest(String username,String password){
+        System.out.println("执行中...");
+        System.out.println("username:"+username);
+        System.out.println("password:"+password);
+        return "success";
+    }
+    //请求数据绑定并封装到对象中
+    @RequestMapping("/formtest")
+    public String formTest(Account account){
+        System.out.println(account);
+        return "success";
+    }
+    //请求数据绑定并封装到包含list和map的对象中
+    @RequestMapping("/formlistmaptest")
+    public String formlistmapTest(Account account){
+        System.out.println(account);
+        return "success";
+    }
+    //请求数据绑定并封装到包含Data类型的对象中
+    @RequestMapping("/formdatetest")
+    public String formdataTest(User user){
+        System.out.println(user);
+        return "success";
+    }
+    //获取Servlet原生的API
+    @RequestMapping("/servletapitest")
+    public String servletapiTest(HttpServletRequest request, HttpServletResponse response){
+        System.out.println(request);
+
+        HttpSession session= request.getSession();
+        System.out.println(session);
+
+        ServletContext servletContext=session.getServletContext();
+        System.out.println(servletContext);
+
+        System.out.println(response);
+        return "success";
+    }
+}
+-----------------------------------------anno.jsp----------------------------------------
+<%--
+  Created by IntelliJ IDEA.
+  User: ZS
+  Date: 2020/5/14
+  Time: 15:50
+  To change this template use File | Settings | File Templates.
+--%>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<html>
+<head>
+    <title>Title</title>
+</head>
+<body>
+    <h2>常见注解</h2>
+    <a href="anno/testRequestParam?name=思思">RequestParam</a><br/>
+    <form action="anno/testRequestBody" method="post">
+        别名：<input type="text" name="username" /><br/>
+        年龄：<input type="text" name="age" /><br/>
+        <input type="submit" value="提交" />
+    </form>
+    <br>
+    <a href="anno/testPathVariable/10">PathVariable</a><br/>
+    <a href="anno/testRequestHeader">RequestHeader</a><br/>
+    <a href="anno/testCookieValue">CookieValue</a><br/>
+    <h3>ModelAttribute注解适用于提交的表单不完整时的封装</h3>
+    <form action="anno/testModelAttribute" method="post">
+        别名：<input type="text" name="uname" /><br/>
+        年龄：<input type="text" name="age" /><br/>
+        <input type="submit" value="提交" />
+    </form>
+    <br>
+    <a href="anno/testCookieValue">CookieValue</a><br/>
+    <h3>SessionAttributes注解只能加在类上</h3>
+    <a href="anno/testSessionAttributes">SessionAttributes</a><br/>
+    <h3>SessionAttributes注解加在类上使其成为通用参数，测试能否获取到session域参数</h3>
+    <a href="anno/testGetSessionAttributes">SessionAttributes</a><br/>
+    <h3>清除session域参数</h3>
+    <a href="anno/testDelSessionAttributes">SessionAttributes</a><br/>
+</body>
+</html>
+-----------------------------------------annoController.java----------------------------------------
+package org.example.controller;
+
+import org.example.domain.User;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.ui.ModelMap;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.support.SessionStatus;
+
+import java.util.Date;
+import java.util.Map;
+
+@Controller
+@RequestMapping("/anno")
+@SessionAttributes(value = {"msg"})   //SessionAttributes作用在类上表明把msg=美美加到了session域对象中
+                                      //放在session域对象中是在success.jsp页面中添加${ sessionScope }来测试，且使其变成全局通用的参数
+public class annoController {
+    @RequestMapping("/testRequestParam")
+    public String testRequestParam(@RequestParam("name")String username){
+        System.out.println("执行了...");
+        System.out.println(username);
+        return "success";
+    }
+    @RequestMapping("/testRequestBody")
+    public String testRequestBody(@RequestBody String body){
+        System.out.println("执行了...");
+        System.out.println(body);
+        return "success";
+    }
+    @RequestMapping("/testPathVariable/{sid}")
+    public String testPathVariable(@PathVariable(name = "sid") String id){
+        System.out.println("执行了...");
+        System.out.println(id);
+        return "success";
+    }
+    @RequestMapping("/testRequestHeader")
+    public String testRequestHeader(@RequestHeader(value = "Accept") String header){
+        System.out.println("执行了...");
+        System.out.println(header);
+        return "success";
+    }
+    @RequestMapping("/testCookieValue")
+    public String testCookieValue(@CookieValue(value = "JSESSIONID") String cookie){
+        System.out.println("执行了...");
+        System.out.println(cookie);
+        return "success";
+    }
+    /*
+    @RequestMapping("/testModelAttribute")
+    public String testModelAttribute(User user){
+        System.out.println("testModelAttribute方法执行了...");
+        System.out.println(user);
+        return "success";
+    }
+    //有返回值的ModelAttribute方法测试
+    @ModelAttribute
+    public User showUser(String uname){
+        System.out.println("showUser方法先于testModelAttribute方法执行了");
+        //模拟去数据库中查询用户
+        User user=new User();
+        user.setUname(uname);
+        user.setAge(20);
+        user.setDate(new Date());
+        return user;
+    }
+    */
+
+    @RequestMapping("/testModelAttribute")
+    public String testModelAttribute(@ModelAttribute("abc")User user){
+        System.out.println("testModelAttribute方法执行了...");
+        System.out.println(user);
+        return "success";
+    }
+    //无返回值的ModelAttribute方法测试
+    @ModelAttribute
+    public void showUser(String uname,Map<String,User> map){
+        System.out.println("showUser方法先于testModelAttribute方法执行了");
+        //模拟去数据库中查询用户
+        User user=new User();
+        user.setUname(uname);
+        user.setAge(20);
+        user.setDate(new Date());
+        map.put("abc",user);
+    }
+    @RequestMapping("/testSessionAttributes")
+    public String testSessionAttributes(Model model){
+        System.out.println("执行了...");
+        //底层会把这组键值对存储到request域对象中
+        // 在success.jsp页面中添加${ requestScope }
+        // 且属性值上需加上isELIgnored="false"
+        model.addAttribute("msg","思思");
+        return "success";
+    }
+    //测试能否获取到session域中的全局对象msg
+    @RequestMapping("/testGetSessionAttributes")
+    public String testGetSessionAttributes(ModelMap modelMap){
+        System.out.println("执行了...");
+        String name=(String) modelMap.get("msg");
+        System.out.println(name);
+        return "success";
+    }
+    //测试能否删除session域中的全局对象msg
+    @RequestMapping("/testDelSessionAttributes")
+    public String testDelSessionAttributes(SessionStatus status){
+        System.out.println("执行了...");
+        status.setComplete();
+        return "success";
+    }
+}
+-----------------------------------------success.jsp----------------------------------------
+<%--
+  Created by IntelliJ IDEA.
+  User: ZS
+  Date: 2020/5/13
+  Time: 17:36
+  To change this template use File | Settings | File Templates.
+--%>
+<%@ page contentType="text/html;charset=UTF-8" language="java" isELIgnored="false" %>
+<html>
+<head>
+    <title>Title</title>
+</head>
+<body>
+    <h3>入门成功</h3>
+
+    ${ requestScope.msg }
+
+    ${ sessionScope }
+</body>
+</html>
